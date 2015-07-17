@@ -8,7 +8,7 @@ while (true) {
         $lengths[] = trim(fgets(STDIN));
     }
     $combination = new CombinationGenerator($length, $lengths);
-    echo $combination->count(2);
+    echo $combination->count(3);
     return;
 }
 
@@ -26,46 +26,37 @@ class CombinationGenerator {
 
     public function count($split_limit)
     {
-        for ($i = 1; $i < $this->length; $i++) {
+        for ($i = 1; $i < ($this->length / $split_limit); $i++) {
+            if (!in_array($i, $this->lengths)) {
+                continue;
+            }
             $elements = [];
             $elements[] = $i;
-            $this->branch($split_limit, $elements);
+            $this->branch($split_limit, $elements, $i);
         }
         return $this->count;
     }
 
-    private function branch($split_limit, $elements)
+    private function branch($split_limit, $elements, $sum)
     {
-        $split_limit--;
-        for ($i = end($elements); $i < $this->length; $i++) {
+        $left_amount = $this->length - $sum;
+
+        $last_split_limit = $split_limit - count($elements);
+        if ($last_split_limit == 1) {
+            if (in_array($left_amount, $this->lengths)) {
+                $this->count++;
+            }
+            return;
+        }
+
+        for ($i = end($elements) + 1; $i <= ($left_amount / $last_split_limit); $i++) {
+            if (!in_array($i, $this->lengths)) {
+                continue;
+            }
             $reefs = $elements;
-            $result = $this->length - array_sum($reefs);
-            if ($i >= $result) {
-                break;
-            }
-
-            if ($split_limit == 0) {
-                $reefs[] = $result;
-                if ($this->contains_all($reefs)) {
-                    $this->count++;
-                }
-                return;
-            } else {
-                $reefs[] = $i + 1;
-                $this->branch($split_limit, $reefs);
-            }
+            $reefs[] = $i;
+            $this->branch($split_limit, $reefs, $sum + $i);
         }
     }
 
-    private function contains_all($reefs)
-    {
-        foreach ($reefs as $reef) {
-            if (!in_array($reef, $this->lengths)) {
-                return false;
-            }
-        }
-        return true;
-    }
 }
-
-?>
