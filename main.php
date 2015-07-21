@@ -7,40 +7,29 @@ while (true) {
     for ($i = 0; $i < $number; $i++) {
         $lengths[] = trim(fgets(STDIN));
     }
-    $combination = new CombinationGenerator($length, $lengths);
-    echo $combination->count(3);
+    $combination = new CombinationGenerator($lengths);
+    echo $combination->count($length, 3);
     return;
 }
 
 class CombinationGenerator {
 
-    private $length;
     private $lengths;
     private $count;
 
-    public function __construct($length, $lengths)
+    public function __construct($lengths)
     {
-        $this->length = $length;
         $this->lengths = $lengths;
     }
 
-    public function count($split_limit)
+    public function count($length, $split_limit)
     {
-        for ($i = 1; $i < ($this->length / $split_limit); $i++) {
-            if (!in_array($i, $this->lengths)) {
-                continue;
-            }
-            $elements = [];
-            $elements[] = $i;
-            $this->branch($split_limit, $elements, $i);
-        }
+        $this->branch($split_limit, [], $length);
         return $this->count;
     }
 
-    private function branch($split_limit, $elements, $sum)
+    private function branch($split_limit, $elements, $left_amount)
     {
-        $left_amount = $this->length - $sum;
-
         $last_split_limit = $split_limit - count($elements);
         if ($last_split_limit == 1) {
             if (in_array($left_amount, $this->lengths)) {
@@ -55,7 +44,7 @@ class CombinationGenerator {
             }
             $reefs = $elements;
             $reefs[] = $i;
-            $this->branch($split_limit, $reefs, $sum + $i);
+            $this->branch($split_limit, $reefs, $left_amount - $i);
         }
     }
 
